@@ -43,8 +43,8 @@ install = (_, jasmine) ->
           ran = true
 
   @afterSuite = (fn) ->
+    # We ensure that the after fn is only run after the last spec in its suite
     do ->
-      # if we are in the last spec of the suite
       if fnHasNoArgs(fn)
         afterEach ->
           fn() if isLastJasmineSpecInSuite()
