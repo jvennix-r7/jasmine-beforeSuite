@@ -7,10 +7,10 @@ Any function that is passed to the `beforeSuite` and `afterSuite` global functio
     beforeSuite ->
       window.globalCondition = new Foobar()
 
-    afterSuite ->
-      delete window.globalCondition
+    afterSuite (done) ->
+      setTimeout((-> delete window.globalCondition), 1000)
 
-### Building source
+### Building from source
 
     $ npm i
     $ ./jake build
