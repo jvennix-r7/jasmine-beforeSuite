@@ -17,10 +17,12 @@
 
 install = (_, jasmine) ->
 
+  # returns true if passed +fn+ has one or more arguments
   fnHasNoArgs = (fn) ->
     fnStr = fn.toString()
     _.isEmpty(fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(/([^\s,]+)/g))
 
+  # returns true if the recently executed spec was the last one in its suite
   isLastJasmineSpecInSuite = ->
     last = _.last(jasmine.getEnv().currentSpec?.suite?.specs_)
     if last then last.id == jasmine.getEnv().currentSpec?.id else false
@@ -49,11 +51,6 @@ install = (_, jasmine) ->
       else
         afterEach (done) ->
           fn(done) if isLastJasmineSpecInSuite()
-
-
-
-    # afterEach (done) ->
-    #   # debugger
 
 # Displayed if the user forgets to include jasmine in the environment
 warningMsg = "jasmine-beforeSuite: Jasmine must be required first. Aborting."
