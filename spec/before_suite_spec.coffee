@@ -73,3 +73,23 @@ describe 'beforeSuite', ->
     it 'sets x to 3', -> expect(x).toEqual(3)
 
     it 'sets x to 3', -> expect(x).toEqual(3)
+
+  describe 'a suite with beforeEachSuite', ->
+
+    x = 0
+
+    beforeEachSuite -> x++
+
+    it 'sets x to 1', -> expect(x).toEqual(1)
+
+    describe 'a nested suite', ->
+
+      it 'sets x to 2', -> expect(x).toEqual(2)
+
+      describe 'a further nested suite', ->
+
+        it 'sets x to 3', -> expect(x).toEqual(3)
+
+    describe 'another nested suite', ->
+
+      it 'sets x to 4', -> expect(x).toEqual(4)

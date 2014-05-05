@@ -22,19 +22,34 @@ install = (_, jasmine) ->
     fnStr = fn.toString()
     _.isEmpty fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(/([^\s,]+)/g)
 
-  @beforeSuite = (fn) ->
+
+  # Runs the passed handler before the currently defined suite
+  #
+  # @param fn [Function] the function to run before a suite
+  # @param opts [Object] the options object
+  # @option opts each [Boolean] run the handler before this suite AND every
+  #   nested suite (@see #beforeEachSuite)
+  @beforeSuite = (fn, opts={}) ->
+    opts.each ?= false
+
     # Similar to _.once, ensure fn() is only called once, and make
     # sure to pass the done() async callback down as necessary.
     suite = jasmine.getEnv().currentSuite
     ran = false
     wrappedFn = if fnHasNoArgs(fn)
        ->
-        fn() unless ran
-        ran = true
+        if opts.each
+          fn()
+        else
+          fn() unless ran
+          ran = true
     else
       (done) ->
-        if ran then setTimeout(done) else fn(done)
-        ran = true
+        if opts.each
+          fn(done)
+        else
+          if ran then setTimeout(done) else fn(done)
+          ran = true
 
     wrappedFn.isBeforeSuite = true
     beforeEach(wrappedFn) # installs the handler
@@ -44,14 +59,20 @@ install = (_, jasmine) ->
     parts = _.partition(suite.before_, (beforeFn) -> beforeFn.isBeforeSuite?)
     suite.before_ = _.flatten [parts[1], tmpFn, parts[0]]
 
+  # Runs the passed handler before the currently defined suite and every nested suite
+  # @param fn [Function] the function to run before a suite
+  @beforeEachSuite = (fn) ->
+    beforeSuite.call(@, fn, each: true)
+
+  # Runs the passed handler after the currently defined suite
+  # @param fn [Function] the function to run before a suite
   @afterSuite = (fn) ->
     # We ensure that the after fn is only run after the last spec in its suite
     suite = jasmine.getEnv().currentSuite
     suite.afterSuite_ ||= []
     suite.afterSuite_.push(fn)
 
-  finish = jasmine.Suite.prototype.finish
-  jasmine.Suite.prototype.finish = (cb) ->
+  jasmine.Suite.prototype.finish = _.wrap jasmine.Suite.prototype.finish, (finish, cb) ->
     _.each(@afterSuite_, (fn) -> fn())
     finish.call @, cb
 
