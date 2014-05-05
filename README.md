@@ -4,11 +4,25 @@ Any function that is passed to the `beforeSuite` and `afterSuite` global functio
 
 ### Example Usage
 
-    beforeSuite ->
-      window.globalCondition = new Foobar()
+    describe 'a suite', ->
+      beforeSuite ->
+        window.globalCondition = new Foobar()
 
-    afterSuite (done) ->
-      setTimeout((-> delete window.globalCondition), 1000)
+      it 'is a Foobar', ->
+        expect(globalCondition.constructor).toEqual(Foobar)
+
+      describe 'a nested spec', ->
+
+        it 'is still a Foobar', ->
+          expect(globalCondition.constructor).toEqual(Foobar)
+
+      afterSuite (done) ->
+        setTimeout((-> delete window.globalCondition), 1000)
+
+    describe 'another suite', ->
+
+      it 'is no longer defined', ->
+        expect(globalCondition).not.toBeDefined()
 
 ### Building from source
 
