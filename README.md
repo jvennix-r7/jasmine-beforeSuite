@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jvennix-r7/jasmine-beforeSuite.svg?branch=master)](https://travis-ci.org/jvennix-r7/jasmine-beforeSuite)
+
 jasmine-beforeSuite provides `beforeSuite` and `afterSuite` global for the [Jasmine](http://jasmine.github.io/) behavior-driven development framework for testing JavaScript code.
 
 Any function that is passed to the `beforeSuite` and `afterSuite` global functions will be stored and ran at the appropriate time. So functions passed to `beforeSuite` will be run *only once*, before all the functions passed to `beforeEach` inside the suite.
