@@ -1,5 +1,5 @@
 {
-  "name": "jasmine-beforeSuite",
+  "name": "jasmine-before-suite",
   "version": "0.1.0",
   "description": "Adds beforeSuite and afterSuite setup functions to Jasmine",
   "homepage": "https://github.com/jvennix-r7/jasmine-beforeSuite",
