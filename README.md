@@ -36,6 +36,7 @@ Any function that is passed to the `beforeSuite` and `afterSuite` global functio
 ### Dependencies
 
 - underscore (~1.6)
+- node >= 0.8
 
 ### Building from source
 
