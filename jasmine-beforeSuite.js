@@ -19,28 +19,42 @@
   var context, install, jasmine;
 
   install = function(_, jasmine) {
-    var finish, fnHasNoArgs;
+    var fnHasNoArgs;
     fnHasNoArgs = function(fn) {
       var fnStr;
       fnStr = fn.toString();
       return _.isEmpty(fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(/([^\s,]+)/g));
     };
-    this.beforeSuite = function(fn) {
+    this.beforeSuite = function(fn, opts) {
       var parts, ran, suite, tmpFn, wrappedFn;
+      if (opts == null) {
+        opts = {};
+      }
+      if (opts.each == null) {
+        opts.each = false;
+      }
       suite = jasmine.getEnv().currentSuite;
       ran = false;
       wrappedFn = fnHasNoArgs(fn) ? function() {
-        if (!ran) {
-          fn();
-        }
-        return ran = true;
-      } : function(done) {
-        if (ran) {
-          setTimeout(done);
+        if (opts.each) {
+          return fn();
         } else {
-          fn(done);
+          if (!ran) {
+            fn();
+          }
+          return ran = true;
         }
-        return ran = true;
+      } : function(done) {
+        if (opts.each) {
+          return fn(done);
+        } else {
+          if (ran) {
+            setTimeout(done);
+          } else {
+            fn(done);
+          }
+          return ran = true;
+        }
       };
       wrappedFn.isBeforeSuite = true;
       beforeEach(wrappedFn);
@@ -50,19 +64,23 @@
       });
       return suite.before_ = _.flatten([parts[1], tmpFn, parts[0]]);
     };
+    this.beforeEachSuite = function(fn) {
+      return beforeSuite.call(this, fn, {
+        each: true
+      });
+    };
     this.afterSuite = function(fn) {
       var suite;
       suite = jasmine.getEnv().currentSuite;
       suite.afterSuite_ || (suite.afterSuite_ = []);
       return suite.afterSuite_.push(fn);
     };
-    finish = jasmine.Suite.prototype.finish;
-    return jasmine.Suite.prototype.finish = function(cb) {
+    return jasmine.Suite.prototype.finish = _.wrap(jasmine.Suite.prototype.finish, function(finish, cb) {
       _.each(this.afterSuite_, function(fn) {
         return fn();
       });
       return finish.call(this, cb);
-    };
+    });
   };
 
   context = (typeof window === "object" && window) || (typeof global === "object" && global) || this;
