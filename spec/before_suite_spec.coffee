@@ -59,3 +59,17 @@ describe 'beforeSuite', ->
     it 'sets x to 2', -> expect(x).toEqual(2)
 
     it 'sets x to 2', -> expect(x).toEqual(2)
+
+  describe 'a Jasmine suite with a beforeSuite -> x=2, beforeSuite -> x=1, and beforeSuite -> x=3', ->
+
+    x = 0
+
+    beforeSuite -> x = 1
+
+    beforeSuite -> x = 2
+
+    beforeSuite -> x = 3
+
+    it 'sets x to 3', -> expect(x).toEqual(3)
+
+    it 'sets x to 3', -> expect(x).toEqual(3)

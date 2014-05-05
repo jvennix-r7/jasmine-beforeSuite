@@ -9,7 +9,7 @@
   },
   "main": "jasmine-beforeSuite.js",
   "dependencies": {
-    "underscore": "~1.4"
+    "underscore": "~1.6"
   },
   "devDependencies": {
     "coffee-script": "~ 1.6.3",

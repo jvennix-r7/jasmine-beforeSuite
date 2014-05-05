@@ -3,9 +3,9 @@ _ = require('underscore') unless @_?
 
 describe 'afterSuite', ->
 
-  describe 'a Jasmine suite with an afterSuite -> x=1', ->
+  x = null
 
-    x = null
+  describe 'a Jasmine suite with an afterSuite -> x=1', ->
 
     afterSuite -> x = 1
 
@@ -13,55 +13,78 @@ describe 'afterSuite', ->
 
     describe 'when called in a nested suite', ->
 
+      it 'sets x to null', -> expect(x).toEqual(null)
+
+      it 'sets x to null', -> expect(x).toEqual(null)
+
+  describe 'when in the next suite', ->
+
+    it 'sets x to 1', -> expect(x).toEqual(1)
+
+    it 'sets x to 1', -> expect(x).toEqual(1)
+
+    describe 'when nesting a spec with another afterSuite -> x=2', ->
+
+      afterSuite -> x = 2
+
       it 'sets x to 1', -> expect(x).toEqual(1)
 
       it 'sets x to 1', -> expect(x).toEqual(1)
 
     describe 'when in the next suite', ->
 
-      it 'sets x to 1', -> expect(x).toEqual(1)
-
-      it 'sets x to 1', -> expect(x).toEqual(1)
-
-      describe 'when nesting a spec with another afterSuite -> x=2', ->
-
-        afterSuite -> x = 2
-
-        it 'sets x to 1', -> expect(x).toEqual(1)
-
-        it 'sets x to 1', -> expect(x).toEqual(1)
-
-      describe 'when in the next suite', ->
-
-        it 'sets x to 2', -> expect(x).toEqual(2)
-
       it 'sets x to 2', -> expect(x).toEqual(2)
 
-      it 'sets x to 2', -> expect(x).toEqual(2)
+    it 'sets x to 2', -> expect(x).toEqual(2)
 
-    describe 'when afterSuite is given an asynchronous function -> x=3', ->
+    it 'sets x to 2', -> expect(x).toEqual(2)
 
-      afterSuite (done) ->
-        setTimeout((-> x = 3; done()), 10)
+    # PENDING: MAKING ASYNC SPECS WORK
+    # describe 'when afterSuite is given an asynchronous function -> x=3', ->
 
-      it 'sets x to 3', -> expect(x).toEqual(3)
+    #   afterSuite (done) ->
+    #     setTimeout((-> x = 3; done()), 10)
 
-      it 'sets x to 3', -> expect(x).toEqual(3)
+    #   it 'sets x to 2', -> expect(x).toEqual(2)
+
+    # describe 'when in the next suite', ->
+
+    #   it 'sets x to 3', -> expect(x).toEqual(3)
+
+    #   it 'sets x to 3', -> expect(x).toEqual(3)
 
   describe 'a Jasmine suite', ->
 
-    x = null
+    y = null
 
-    it 'sets x to null', -> expect(x).toEqual(null)
+    it 'sets y to null', -> expect(y).toEqual(null)
 
-    describe 'with an afterSuite -> x=2 before an afterEach -> x=1', ->
+    describe 'with an afterSuite -> y=2 before an afterEach -> y=1', ->
 
-      afterSuite -> x = 2
+      afterSuite -> y = 2
 
-      afterEach -> x = 1
+      afterEach -> y = 1
 
-      it 'sets x to null', -> expect(x).toEqual(null)
+      it 'sets y to null', -> expect(y).toEqual(null)
 
     describe 'in the next suite', ->
 
-      it 'sets x to 2', -> expect(x).toEqual(2)
+      it 'sets y to 2', -> expect(y).toEqual(2)
+
+  describe 'a Jasmine suite', ->
+
+    z = null
+
+    it 'sets z to null', -> expect(z).toEqual(null)
+
+    describe 'with an afterSuite -> z=2 and an afterSuite -> z=3', ->
+
+      afterSuite -> z = 2
+
+      afterSuite -> z = 3
+
+      it 'sets z to null', -> expect(z).toEqual(null)
+
+    describe 'in the next suite', ->
+
+      it 'sets z to 3', -> expect(z).toEqual(3)

@@ -16,78 +16,63 @@
 //
 
 (function() {
-  var install, warningMsg;
+  var context, install, jasmine;
 
   install = function(_, jasmine) {
-    var fnHasNoArgs, isLastJasmineSpecInSuite;
+    var finish, fnHasNoArgs;
     fnHasNoArgs = function(fn) {
       var fnStr;
       fnStr = fn.toString();
       return _.isEmpty(fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(/([^\s,]+)/g));
     };
-    isLastJasmineSpecInSuite = function() {
-      var last, _ref, _ref1, _ref2;
-      last = _.last((_ref = jasmine.getEnv().currentSpec) != null ? (_ref1 = _ref.suite) != null ? _ref1.specs_ : void 0 : void 0);
-      if (last) {
-        return last.id === ((_ref2 = jasmine.getEnv().currentSpec) != null ? _ref2.id : void 0);
-      } else {
-        return false;
-      }
-    };
     this.beforeSuite = function(fn) {
-      return (function() {
-        var ran;
-        ran = false;
-        if (fnHasNoArgs(fn)) {
-          return beforeEach(function() {
-            if (!ran) {
-              fn();
-            }
-            return ran = true;
-          });
-        } else {
-          return beforeEach(function(done) {
-            if (!ran) {
-              fn(done);
-            }
-            return ran = true;
-          });
+      var parts, ran, suite, tmpFn, wrappedFn;
+      suite = jasmine.getEnv().currentSuite;
+      ran = false;
+      wrappedFn = fnHasNoArgs(fn) ? function() {
+        if (!ran) {
+          fn();
         }
-      })();
+        return ran = true;
+      } : function(done) {
+        if (ran) {
+          setTimeout(done);
+        } else {
+          fn(done);
+        }
+        return ran = true;
+      };
+      wrappedFn.isBeforeSuite = true;
+      beforeEach(wrappedFn);
+      tmpFn = suite.before_.shift();
+      parts = _.partition(suite.before_, function(beforeFn) {
+        return beforeFn.isBeforeSuite != null;
+      });
+      return suite.before_ = _.flatten([parts[1], tmpFn, parts[0]]);
     };
-    return this.afterSuite = function(fn) {
-      return (function() {
-        if (fnHasNoArgs(fn)) {
-          return afterEach(function() {
-            if (isLastJasmineSpecInSuite()) {
-              return fn();
-            }
-          });
-        } else {
-          return afterEach(function(done) {
-            if (isLastJasmineSpecInSuite()) {
-              return fn(done);
-            }
-          });
-        }
-      })();
+    this.afterSuite = function(fn) {
+      var suite;
+      suite = jasmine.getEnv().currentSuite;
+      suite.afterSuite_ || (suite.afterSuite_ = []);
+      return suite.afterSuite_.push(fn);
+    };
+    finish = jasmine.Suite.prototype.finish;
+    return jasmine.Suite.prototype.finish = function(cb) {
+      _.each(this.afterSuite_, function(fn) {
+        return fn();
+      });
+      return finish.call(this, cb);
     };
   };
 
-  warningMsg = "jasmine-beforeSuite: Jasmine must be required first. Aborting.";
+  context = (typeof window === "object" && window) || (typeof global === "object" && global) || this;
 
-  if (typeof module !== 'undefined' && module.exports) {
-    if (global.jasmine != null) {
-      install.call(global, require('underscore'), global.jasmine);
-    } else {
-      console.error(warningMsg);
-    }
+  jasmine = context.jasmine || require("jasmine");
+
+  if (jasmine == null) {
+    console.error("jasmine-beforeSuite: Jasmine must be required first. Aborting.");
   } else {
-    if ((this.jasmine != null) && (this._ != null)) {
-      install.call(this, this._, this.jasmine);
-    } else {
-      console.error(warningMsg);
-    }
+    install.call(context, context._ || require("underscore"), jasmine);
   }
 
 }).call(this);

@@ -22,11 +22,6 @@ install = (_, jasmine) ->
     fnStr = fn.toString()
     _.isEmpty fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(/([^\s,]+)/g)
 
-  # returns true if the recently executed spec was the last one in its suite
-  isLastJasmineSpecInSuite = ->
-    last = _.last(jasmine.getEnv().currentSpec?.suite?.specs_)
-    last?.id == jasmine.getEnv().currentSpec?.id
-
   @beforeSuite = (fn) ->
 
     # Similar to _.once, ensure fn() is only called once, and make
@@ -47,37 +42,25 @@ install = (_, jasmine) ->
 
     # ensure our before() gets called before other beforeEach and after other beforeSuite
     tmpFn = suite.before_.shift()
-    lastBeforeSuite = _.find suite.before_, (before) -> before.isBeforeSuite is true
-    lastBeforeSuiteIdx = _.indexOf(suite.before_, lastBeforeSuite)
-    if !_.isNumber(lastBeforeSuiteIdx) || lastBeforeSuiteIdx == -1
-      lastBeforeSuiteIdx = suite.before_.length
-    suite.before_.splice(lastBeforeSuiteIdx, 0, tmpFn)
+    parts = _.partition(suite.before_, (beforeFn) -> beforeFn.isBeforeSuite?)
+    suite.before_ = _.flatten [parts[1], tmpFn, parts[0]]
 
   @afterSuite = (fn) ->
     # We ensure that the after fn is only run after the last spec in its suite
     suite = jasmine.getEnv().currentSuite
-    wrappedFn = if fnHasNoArgs(fn)
-      afterEach ->
-        fn() if isLastJasmineSpecInSuite(suite)
-    else
-      afterEach (done) ->
-        fn(done) if isLastJasmineSpecInSuite(suite)
+    suite.afterSuite_ ||= []
+    suite.afterSuite_.push(fn)
 
-    # ensure our afterEach() gets called other afterEach's
+  finish = jasmine.Suite.prototype.finish
+  jasmine.Suite.prototype.finish = (cb) ->
+    _.each(@afterSuite_, (fn) -> fn())
+    finish.call @, cb
 
-# Displayed if the user forgets to include jasmine in the environment
-warningMsg = "jasmine-beforeSuite: Jasmine must be required first. Aborting."
+context = (typeof window == "object" && window) || (typeof global == "object" && global) || @
+jasmine = context.jasmine || require("jasmine")
 
-# Pass the dependencies in different ways for node.js vs. browser
-if typeof module != 'undefined' && module.exports
-  # being used in node.js
-  if global.jasmine?
-    install.call(global, require('underscore'), global.jasmine)
-  else
-    console.error warningMsg
+unless jasmine?
+  # Displayed if the user forgets to include jasmine in the environment
+  console.error "jasmine-beforeSuite: Jasmine must be required first. Aborting."
 else
-  # being used from the browser
-  if @jasmine? and @_?
-    install.call(@, @_, @jasmine)
-  else
-    console.error warningMsg
+  install.call(context, context._ || require("underscore"), jasmine)
