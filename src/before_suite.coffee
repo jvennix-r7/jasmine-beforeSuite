@@ -23,7 +23,6 @@ install = (_, jasmine) ->
     _.isEmpty fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(/([^\s,]+)/g)
 
   @beforeSuite = (fn) ->
-
     # Similar to _.once, ensure fn() is only called once, and make
     # sure to pass the done() async callback down as necessary.
     suite = jasmine.getEnv().currentSuite
@@ -56,11 +55,11 @@ install = (_, jasmine) ->
     _.each(@afterSuite_, (fn) -> fn())
     finish.call @, cb
 
+# Install the added and patched functions in the correct context
 context = (typeof window == "object" && window) || (typeof global == "object" && global) || @
 jasmine = context.jasmine || require("jasmine")
 
-unless jasmine?
-  # Displayed if the user forgets to include jasmine in the environment
+unless jasmine? # the user forgot to include jasmine in the environment
   console.error "jasmine-beforeSuite: Jasmine must be required first. Aborting."
 else
   install.call(context, context._ || require("underscore"), jasmine)
