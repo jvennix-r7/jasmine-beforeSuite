@@ -31,6 +31,10 @@ Any function that is passed to the `beforeSuite` and `afterSuite` global functio
       it 'is no longer defined', ->
         expect(globalCondition).not.toBeDefined()
 
+### Dependencies
+
+- underscore (~1.6)
+
 ### Building from source
 
     $ npm i
