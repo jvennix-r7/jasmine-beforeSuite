@@ -3,45 +3,59 @@ _ = require('underscore') unless @_?
 
 describe 'beforeSuite', ->
 
-  describe 'a Jasmine suite with a beforeSuite that increments x', ->
+  describe 'a Jasmine suite with a beforeSuite -> x=1', ->
+
+    x = null
+
+    beforeSuite -> x = 1
+
+    it 'sets x to 1', -> expect(x).toEqual(1)
+
+    it 'sets x to 1', -> expect(x).toEqual(1)
+
+    describe 'when nesting a spec with another beforeSuite -> x=2', ->
+
+      beforeSuite -> x = 2
+
+      it 'sets x to 2', -> expect(x).toEqual(2)
+
+      it 'sets x to 2', -> expect(x).toEqual(2)
+
+    describe 'the next nested spec', ->
+
+      it 'sets x to 2', -> expect(x).toEqual(2)
+
+      it 'sets x to 2', -> expect(x).toEqual(2)
+
+    describe 'when beforeSuite is given an asynchronous function -> x=3', ->
+
+      beforeSuite (done) ->
+        setTimeout((-> x = 3; done()), 10)
+
+      it 'sets x to 3', -> expect(x).toEqual(3)
+
+      it 'sets x to 3', -> expect(x).toEqual(3)
+
+  describe 'a Jasmine suite with a beforeSuite -> x=2 after a beforeEach -> x=1', ->
 
     x = 0
 
-    beforeSuite ->
-      x++
+    beforeEach -> x = 1
 
-    it 'sets x to 1', ->
-      expect(x).toEqual(1)
+    beforeSuite -> x = 2
 
-    it 'still sets x to 1', ->
-      expect(x).toEqual(1)
+    it 'sets x to 1', -> expect(x).toEqual(1)
 
-    it 'still sets x to 1', ->
-      expect(x).toEqual(1)
+    it 'sets x to 1', -> expect(x).toEqual(1)
 
-    describe 'when nesting a spec with another beforeSuite that decrements x', ->
+  describe 'a Jasmine suite with a beforeSuite -> x=2 after a beforeSuite -> x=1', ->
 
-      beforeSuite ->
-        x--
+    x = 0
 
-      it 'sets x to 0', ->
-        expect(x).toEqual(0)
+    beforeSuite -> x = 1
 
-      it 'still sets x to 0', ->
-        expect(x).toEqual(0)
+    beforeSuite -> x = 2
 
-    describe 'when nesting another spec', ->
+    it 'sets x to 2', -> expect(x).toEqual(2)
 
-      it 'sets x to 0', ->
-        expect(x).toEqual(0)
-
-      it 'still sets x to 0', ->
-        expect(x).toEqual(0)
-
-    describe 'when used in an asynchronous function', ->
-
-      beforeSuite (done) ->
-        setTimeout((-> x = 5; done()), 10)
-
-      it 'sets x to 5', ->
-        expect(x).toEqual(5)
+    it 'sets x to 2', -> expect(x).toEqual(2)

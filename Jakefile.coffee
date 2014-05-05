@@ -1,5 +1,8 @@
+fs = require 'fs'
+_ = require 'underscore'
 child_process = require 'child_process'
 JASMINE_PATH = './node_modules/jasmine-node/lib/jasmine-node/cli.js'
+SRC_PATH = './src/before_suite.coffee'
 DIST_PATH = './jasmine-beforeSuite.js'
 
 run_task = (cmd, cmpl_fn=complete) ->
@@ -8,7 +11,7 @@ run_task = (cmd, cmpl_fn=complete) ->
     process.stdout.write(stderr) if stderr.trim().length?
     cmpl_fn() if cmpl_fn?
 
-desc 'Runs the entire test suite: ./spec/'
+desc 'Runs the test spec'
 task 'spec', { async: true }, ->
   debug = if process.env.DEBUG? then '--debug-brk' else ''
   spec_file = process.env.SPEC || './spec'
@@ -16,8 +19,9 @@ task 'spec', { async: true }, ->
 
 desc 'Compiles ./src into jasmine-beforeSuite.js'
 task 'build', ->
-  fs = require('fs')
-  cs = require('coffee-script')
-  js = cs.compile(fs.readFileSync('./src/before_suite.coffee').toString())
-  fs.writeFileSync(DIST_PATH, js)
+  source = fs.readFileSync(SRC_PATH).toString()
+  js = require('coffee-script').compile(source)
+  comments = _.filter(source.split("\n\n")[0].split("\n"), (line) -> line.match(/^#.*$/))
+  header = _.map(comments, (comment) -> comment.replace(/^#/, '//')).join("\n")
+  fs.writeFileSync(DIST_PATH, header+"\n\n"+js)
   console.log("Compiled successfully. Saved in jasmine-beforeSuite.js")

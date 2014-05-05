@@ -1,3 +1,20 @@
+//
+// jasmine-beforeSuite - 0.1.0
+//
+// A plugin for the Jasmine behavior-driven Javascript testing framework that
+// adds beforeSuite and afterSuite global setup functions.
+//
+// Works in both node.js and a browser environment.
+//
+// Requires jasmine.js and underscore.js.
+//
+// @author Joe Vennix
+// @copyright Rapid7 2014
+// @see https://github.com/jvennix-r7/jasmine-beforeSuite
+//
+// Released under the MIT License.
+//
+
 (function() {
   var install, warningMsg;
 

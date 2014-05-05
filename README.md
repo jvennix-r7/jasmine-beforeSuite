@@ -17,7 +17,7 @@ Any function that is passed to the `beforeSuite` and `afterSuite` global functio
 
 ### Running specs
 
-    $ ./jake spec
+    $ ./jake spec [DEBUG=1] [SPEC=./spec/before_suite_spec.coffee]
 
 ### License
 

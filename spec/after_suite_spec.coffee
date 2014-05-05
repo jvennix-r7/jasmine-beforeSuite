@@ -3,25 +3,15 @@ _ = require('underscore') unless @_?
 
 describe 'afterSuite', ->
 
-  x = 0
+  describe 'a Jasmine suite with an afterSuite -> x=1', ->
 
-  describe 'when called in a nested suite', ->
+    x = null
 
     afterSuite -> x = 1
 
-    it 'sets x to 0', -> expect(x).toEqual(0)
+    it 'sets x to null', -> expect(x).toEqual(null)
 
-    it 'sets x to 0', -> expect(x).toEqual(0)
-
-    it 'sets x to 0', -> expect(x).toEqual(0)
-
-  describe 'when in the next suite', ->
-
-    it 'sets x to 1', -> expect(x).toEqual(1)
-
-    describe 'when called in a further nested suite', ->
-
-      afterSuite -> x = 2
+    describe 'when called in a nested suite', ->
 
       it 'sets x to 1', -> expect(x).toEqual(1)
 
@@ -29,19 +19,49 @@ describe 'afterSuite', ->
 
     describe 'when in the next suite', ->
 
+      it 'sets x to 1', -> expect(x).toEqual(1)
+
+      it 'sets x to 1', -> expect(x).toEqual(1)
+
+      describe 'when nesting a spec with another afterSuite -> x=2', ->
+
+        afterSuite -> x = 2
+
+        it 'sets x to 1', -> expect(x).toEqual(1)
+
+        it 'sets x to 1', -> expect(x).toEqual(1)
+
+      describe 'when in the next suite', ->
+
+        it 'sets x to 2', -> expect(x).toEqual(2)
+
       it 'sets x to 2', -> expect(x).toEqual(2)
 
-    it 'sets x to 2', -> expect(x).toEqual(2)
+      it 'sets x to 2', -> expect(x).toEqual(2)
 
-    it 'sets x to 2', -> expect(x).toEqual(2)
+    describe 'when afterSuite is given an asynchronous function -> x=3', ->
 
-  describe 'when called asynchronously', ->
+      afterSuite (done) ->
+        setTimeout((-> x = 3; done()), 10)
 
-    afterSuite (done) ->
-      setTimeout((-> x=3; done()), 10)
+      it 'sets x to 3', -> expect(x).toEqual(3)
 
-    it 'sets x to 2', -> expect(x).toEqual(2)
+      it 'sets x to 3', -> expect(x).toEqual(3)
 
-  describe 'when in the next suite', ->
+  describe 'a Jasmine suite', ->
 
-    it 'sets x to 3', -> expect(x).toEqual(3)
+    x = null
+
+    it 'sets x to null', -> expect(x).toEqual(null)
+
+    describe 'with an afterSuite -> x=2 before an afterEach -> x=1', ->
+
+      afterSuite -> x = 2
+
+      afterEach -> x = 1
+
+      it 'sets x to null', -> expect(x).toEqual(null)
+
+    describe 'in the next suite', ->
+
+      it 'sets x to 2', -> expect(x).toEqual(2)
