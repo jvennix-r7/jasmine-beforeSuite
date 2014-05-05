@@ -1,12 +1,19 @@
-jasmine-beforeSuite provides a "beforeSuite" global for the [Jasmine](http://jasmine.github.io/) behavior-driven development framework for testing JavaScript code.
+jasmine-beforeSuite provides `beforeSuite` and `afterSuite` global for the [Jasmine](http://jasmine.github.io/) behavior-driven development framework for testing JavaScript code.
 
 Any function that is passed to the `beforeSuite` and `afterSuite` global functions will be stored and ran at the appropriate time. So functions passed to `beforeSuite` will be run *only once*, before all the functions passed to `beforeEach` inside the suite.
+
+### Features
+
+- beforeSuite supports asynchronous functions
+- minimal wrapping (only `jasmine.Suite.prototype.finish` is wrapped)
+- works in both browser and node.js
 
 ### Example Usage
 
     describe 'a suite', ->
-      beforeSuite ->
-        window.globalCondition = new Foobar()
+
+      beforeSuite (done) ->
+        setTimeout((-> window.globalCondition = new Foobar(); done()), 10)
 
       it 'is a Foobar', ->
         expect(globalCondition.constructor).toEqual(Foobar)
